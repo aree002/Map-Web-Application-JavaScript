@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CSV to 2D Array to JSON</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+  <h2>Upload CSV to Convert and Download as JSON</h2>
+  <input type="file" id="csvFileInput" accept=".csv" />
+  <pre id="output" style="white-space: pre-wrap; font-family: monospace;"></pre>
+
+  <script>
+    document.getElementById("csvFileInput").addEventListener("change", function (event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      Papa.parse(file, {
+        complete: function (results) {
+          const data = results.data;
+          const array2D = data.map(row => row.map(cell => cell));
+
+          // Display in browser
+          document.getElementById("output").textContent = JSON.stringify(array2D, null, 2);
+
+          // Download as JSON file
+          downloadJSON(array2D, "output.json");
+        },
+        error: function (err) {
+          console.error("Error parsing CSV:", err);
+        }
+      });
+    });
+
+    function downloadJSON(data, filename) {
+      const jsonStr = JSON.stringify(data, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
